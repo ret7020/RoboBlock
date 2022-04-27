@@ -24,7 +24,7 @@ def spawn_obj(type=0):
         dndr_button.make_draggable() 
         button.bind('<Double-Button-1>', lambda x=0: spawn_obj(0))
     elif type == 1:
-        print("Spawn block servo")
+        print("Spawn block servo") #Not fully supported yet
         button = tk.Button(text="Servos\nType: None\nData:None", bd=0, bg="#FF3632")
         blocks[button] = {"action": type,
                                         "type": None,
@@ -100,9 +100,9 @@ root = tk.Tk()
 mainmenu = tk.Menu(root)
 root.config(menu=mainmenu) 
 filemenu = tk.Menu(mainmenu, tearoff=0)
-filemenu.add_command(label="Open project")
+filemenu.add_command(label="Open project", command=lambda prj = "projects/20220427-191902/", root=root: file_worker.read_project(prj, root))
 filemenu.add_command(label="New project")
-filemenu.add_command(label="Save project")
+filemenu.add_command(label="Save project", command=lambda data=blocks: file_worker.write_project(data))
 filemenu.add_command(label="Exit")
 
 sourcemenu = tk.Menu(mainmenu, tearoff=0)
@@ -124,5 +124,5 @@ action_chain_objects_frame = tk.Frame(height=200)
 action_chain_objects_frame.grid(row=1)
 avaliable_obj_title = tk.Label(text="Available actions", font="Arial 16 bold").grid(row=1)
 spawn_obj()
-spawn_obj(1)
+#spawn_obj(1)
 root.mainloop()
