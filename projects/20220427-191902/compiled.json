@@ -1,1 +1,0 @@
-[{"action": 0, "type": 0, "steps_cnt": "12345", "direction": "\u2191", "comment": "Test comm\n"}, {"action": 1, "type": null, "steps_cnt": null, "comment": null}, {"action": 0, "type": 0, "steps_cnt": "100", "direction": "\u2191", "comment": "Another test comm\n"}, {"action": 0, "type": 0, "steps_cnt": "1000", "direction": "\u2193", "comment": "9000\n"}]

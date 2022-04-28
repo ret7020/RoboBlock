@@ -10,6 +10,6 @@ Folder with 2 files:
 compiled.json - Way compiled into JSON format
 project_settings.json ->
 {
-    "compiled": path,
+    "compiled_json": path,
     "blocks": [[x, y], [x, y] ....]
 }
