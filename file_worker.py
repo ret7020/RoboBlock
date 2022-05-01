@@ -9,7 +9,7 @@ def write(data, path=None):
     data = [data_temp[k] for k in sorted(data_temp)]
     
     if not path:
-        path = f"{time.strftime('%Y%m%d-%H%M%S')}.json"
+        path = f"ways/{time.strftime('%Y%m%d-%H%M%S')}.json"
     print(path)
     with open(path, "w") as file:
         json.dump(data, file)

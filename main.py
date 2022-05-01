@@ -6,8 +6,10 @@ from idlelib.tooltip import Hovertip
 import time
 import os
 from pathlib import Path
+import interpreter.arduino_converter as ardconvert
 
 VERSION = "1.0.0 [dev]"
+DARKTHEME = True
 
 class Logger():
     def __init__(self, log_level=1):
@@ -22,9 +24,11 @@ class Logger():
 
 
 class App():
-    def __init__(self, master) -> None:
+    def __init__(self, master):
         self.root = master
         self.root.geometry("800x400")
+        if DARKTHEME:
+            self.root.configure(background='#121212')
         self.root.title(f"RoboBlock {VERSION}")
         self.blocks = {}
         self.project_settings = {
@@ -36,6 +40,7 @@ class App():
 
     def draw_ui(self):
         mainmenu = tk.Menu(self.root)
+        
         self.root.config(menu=mainmenu)
         filemenu = tk.Menu(mainmenu, tearoff=0)
         filemenu.add_command(label="Open project",
@@ -48,6 +53,8 @@ class App():
         sourcemenu = tk.Menu(mainmenu, tearoff=0)
         sourcemenu.add_command(label="Compile to JSON",
                                command=lambda blocks=self.blocks: file_worker.write(blocks))
+        sourcemenu.add_command(label="Compile to Arduino array",
+                               command=lambda blocks=self.blocks: print(ardconvert.convert(data=blocks)))
         sourcemenu.add_command(label="Run on RPI")
         sourcemenu.add_command(label="Step by step evalution")
         sourcemenu.add_command(label="Change start step")
@@ -64,22 +71,41 @@ class App():
         mainmenu.add_cascade(label="Source",
                              menu=sourcemenu)
 
+        
+
         action_line_title = tk.Label(self.root,
-                                     text="Actions chain", font="Arial 16 bold").grid(column=0, row=0)
-        action_chain_objects_frame = tk.Frame(self.root, height=200)
+                                     text="Actions chain", font="Arial 16 bold")
+        action_line_title.grid(column=0, row=0)
+        action_chain_objects_frame = tk.Frame(self.root, height=200, bd=0)
         action_chain_objects_frame.grid(row=1)
         avaliable_obj_title = tk.Label(self.root, 
-            text="Available actions", font="Arial 16 bold").grid(row=1)
+            text="Available actions", font="Arial 16 bold")
+        avaliable_obj_title.grid(row=1)
 
         physical_actions_title = tk.Label(self.root, 
-            text="Physical actions", font="Arial 14 bold", fg="blue").place(x=6, y=180)
+            text="Physical actions", font="Arial 14 bold", fg="blue")
+        physical_actions_title.place(x=6, y=180)
 
-        physical_actions_title = tk.Label(self.root, 
-            text="Structs", font="Arial 14 bold", fg="red").place(x=300, y=180)
+        struct_actions_title = tk.Label(self.root, 
+            text="Structs", font="Arial 14 bold", fg="red")
+        struct_actions_title.place(x=300, y=180)
 
-        physical_actions_title = tk.Label(self.root, 
-            text="Maths", font="Arial 14 bold", fg="orange").place(x=550, y=180)
+        math_actions_title = tk.Label(self.root, 
+            text="Maths", font="Arial 14 bold", fg="orange")
+        math_actions_title.place(x=550, y=180)
 
+        if DARKTHEME:
+            mainmenu.configure(background='#121212', foreground='white')
+            filemenu.configure(background='#121212', foreground='white')
+            sourcemenu.configure(background='#121212', foreground='white')
+            projectmenu.configure(background='#121212', foreground='white')
+            action_line_title.configure(background='#121212', foreground='white')
+            action_chain_objects_frame.configure(background="#121212")
+            avaliable_obj_title.configure(background='#121212', foreground='white')
+            physical_actions_title.configure(background='#121212')
+            struct_actions_title.configure(background='#121212')
+            math_actions_title.configure(background='#121212')
+            
     def project_select_dialog(self):
         folder_selected = filedialog.askdirectory()
         if folder_selected:
@@ -156,8 +182,9 @@ class App():
             configure_window = tk.Toplevel(root)
             configure_window.title("Configure block")
             configure_window.geometry("500x300")
-            tk.Label(configure_window, text="Counter type:",
-                     font="Arial 13 bold").pack()
+            counter_type_label = tk.Label(configure_window, text="Counter type",
+                     font="Arial 13 bold")
+            counter_type_label.pack()
 
             options = [
                 "Steps count",
@@ -173,8 +200,9 @@ class App():
             counter_type_chooser = tk.OptionMenu(
                 configure_window, choose_var, *options)
             counter_type_chooser.pack()
-            tk.Label(configure_window, text="Steps count",
-                     font="Arial 13 bold").pack()
+            steps_counter_label = tk.Label(configure_window, text="Steps count",
+                     font="Arial 13 bold")
+            steps_counter_label.pack()
             saved_data_var = ""
             if block_ui in self.blocks:
                 saved_data_var = self.blocks[block_ui]["steps_cnt"]
@@ -183,16 +211,18 @@ class App():
             action_data = tk.Entry(configure_window, textvariable=data_var)
             action_data.pack()
 
-            tk.Label(configure_window, text="Direction",
-                     font="Arial 13 bold").pack()
+            direction_label = tk.Label(configure_window, text="Direction",
+                     font="Arial 13 bold")
+            direction_label.pack()
             choose_direction_var = tk.StringVar(
                 configure_window, value=directions_options[0])
             direction_chooser = tk.OptionMenu(
                 configure_window, choose_direction_var, *directions_options)
             direction_chooser.pack()
 
-            tk.Label(configure_window, text="Comment",
-                     font="Arial 13 bold").pack()
+            comment_label = tk.Label(configure_window, text="Comment",
+                     font="Arial 13 bold")
+            comment_label.pack()
             comment_entry = tk.Text(configure_window, width=40, height=5)
             comment_entry.pack()
             if block_ui in self.blocks and self.blocks[block_ui]["comment"]:
@@ -200,8 +230,19 @@ class App():
 
             save_btn = tk.Button(configure_window, text="Save", command=lambda a=block_ui, b=options.index(
                 choose_var.get()), c=data_var, d=choose_direction_var, e=comment_entry: self.save(a, b, c, d, e))
-            save_btn.pack()
+            save_btn.pack(pady=10)
 
+            if DARKTHEME:
+                configure_window.configure(background="#121212")
+                counter_type_label.configure(background='#121212', foreground='white')
+                counter_type_chooser.configure(highlightbackground = "#121212", highlightcolor= "#121212", background='#121212', foreground='white', bg="#121212", activebackground="#121212", activeforeground="red")
+                steps_counter_label.configure(background='#121212', foreground='white')
+                direction_label.configure(background='#121212', foreground='white')
+                action_data.configure(highlightcolor="white", background="#1a1919", foreground="white", insertbackground="red")
+                direction_chooser.configure(highlightbackground = "#121212", highlightcolor= "#121212", background='#121212', foreground='white', bg="#121212", activebackground="#121212", activeforeground="red")
+                comment_label.configure(background='#121212', foreground='white')
+                comment_entry.configure(highlightcolor="white", background="#1a1919", foreground="white", insertbackground="red")
+                save_btn.configure(background="black", foreground="white", borderwidth=0, highlightcolor="black")
 
 if __name__ == "__main__":
     root = tk.Tk()
