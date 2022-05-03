@@ -36,7 +36,7 @@ def convert(data=None, file=None):
                     stepper_left = stepper_right = -int(step['steps_cnt'])
                 string_format += f"\n{tab}{{{stepper_left}, {stepper_right}, 1, 0}},"
     string_format += "\n}"
-    with open(f"ways/arduino_{time.strftime('%Y%m%d-%H%M%S')}.txt") as file:
+    with open(f"ways/arduino_{time.strftime('%Y%m%d-%H%M%S')}.txt", "w") as file:
         file.write(string_format)
     return string_format
 

@@ -7,9 +7,18 @@ import time
 import os
 from pathlib import Path
 import interpreter.arduino_converter as ardconvert
+import json
 
-VERSION = "1.0.0 [dev]"
-DARKTHEME = True
+
+#Read config
+with open("config.json", "r") as config_file:
+    config_dict = json.load(config_file)
+VERSION = config_dict["VERSION"]
+
+if config_dict["THEME"] == "DARK":
+    DARKTHEME = True
+else:
+    DARKTHEME = False
 
 class Logger():
     def __init__(self, log_level=1):
